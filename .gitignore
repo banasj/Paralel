@@ -1,0 +1,27 @@
+# .gitignore pre C++ / TBB projekt
+
+# Build výstupy
+build/
+cmake-build-*/
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dll
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dočasné súbory
+*.tmp
+*.log
