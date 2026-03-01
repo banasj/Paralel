@@ -1,4 +1,4 @@
-## Úloha 3: Producer-Consumer pipeline (so synchronizáciou)
+## Úloha 3: Problém hodujúcich filozofov (so synchronizáciou)
 
 # Sekvenčná verzia
 add_executable(u3_seq src/main_seq.cpp)

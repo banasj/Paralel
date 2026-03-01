@@ -1,42 +1,43 @@
 // ============================================================================
-// Úloha 2: Gaussovský filter — SEKVENČNÁ verzia (C++)
+// Úloha 2: K-means klasterizácia — SEKVENČNÁ verzia (C++)
 // ============================================================================
 // Kompilácia: g++ -O2 -o main_seq src/main_seq.cpp
-// Spustenie:  ./main_seq [šírka] [výška] [veľkosť_jadra]
+// Spustenie:  ./main_seq [počet_bodov] [počet_zhlukov] [iterácie]
 // ============================================================================
 
-#include "image_filter.h"
+#include "kmeans.h"
 
 int main(int argc, char* argv[]) {
-    // Defaultné parametre
     struct Config {
-        int width, height, kernel_size;
+        int num_points, num_clusters, max_iter;
     };
     std::vector<Config> configs = {
-        {1920, 1080, 5},
-        {1920, 1080, 11},
-        {1920, 1080, 21},
-        {3840, 2160, 5},
-        {3840, 2160, 11},
-        {3840, 2160, 21},
+        {100000,  5,  50},
+        {100000,  10, 50},
+        {1000000, 5,  50},
+        {1000000, 10, 50},
+        {1000000, 20, 50},
     };
 
-    if (argc >= 4) {
-        configs = {{std::stoi(argv[1]), std::stoi(argv[2]), std::stoi(argv[3])}};
+    if (argc >= 3) {
+        int np = std::stoi(argv[1]);
+        int nc = std::stoi(argv[2]);
+        int mi = (argc >= 4) ? std::stoi(argv[3]) : 50;
+        configs = {{np, nc, mi}};
     }
 
     for (const auto& cfg : configs) {
-        std::cout << "\n=== Sekvenčný Gaussian blur " << cfg.width << "x" << cfg.height
-                  << " (jadro " << cfg.kernel_size << "x" << cfg.kernel_size << ") ===" << std::endl;
+        std::cout << "\n=== Sekvenčný K-means: " << cfg.num_points << " bodov, "
+                  << cfg.num_clusters << " zhlukov, max " << cfg.max_iter << " iterácií ===" << std::endl;
 
-        auto img = generate_test_image(cfg.width, cfg.height);
-        auto kernel = generate_gaussian_kernel(cfg.kernel_size);
+        auto points = generate_data(cfg.num_points, cfg.num_clusters);
 
-        Image result;
+        std::vector<int> assignments;
         double time_ms = measure_time([&]() {
-            result = apply_filter_seq(img, kernel);
+            assignments = kmeans_seq(points, cfg.num_clusters, cfg.max_iter);
         });
 
+        print_kmeans_stats(assignments, cfg.num_clusters);
         std::cout << "Čas: " << std::fixed << std::setprecision(2) << time_ms << " ms" << std::endl;
     }
 

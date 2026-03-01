@@ -1,42 +1,41 @@
 // ============================================================================
-// Úloha 3: Producer-Consumer Pipeline — SEKVENČNÁ verzia (C++)
+// Úloha 3: Problém hodujúcich filozofov — SEKVENČNÁ verzia (C++)
 // ============================================================================
 // Kompilácia: g++ -O2 -o main_seq src/main_seq.cpp
-// Spustenie:  ./main_seq [počet_záznamov]
+// Spustenie:  ./main_seq [počet_filozofov] [počet_jedál] [intenzita]
 // ============================================================================
 
-#include "pipeline.h"
+#include "dining.h"
 
 int main(int argc, char* argv[]) {
-    std::vector<int> record_counts = {100000, 1000000, 10000000};
+    std::vector<DiningConfig> configs = {
+        {5,  10, 500, 500},
+        {5,  50, 500, 500},
+        {10, 10, 500, 500},
+        {10, 50, 500, 500},
+    };
 
-    if (argc >= 2) {
-        record_counts = {std::stoi(argv[1])};
+    if (argc >= 3) {
+        int np = std::stoi(argv[1]);
+        int nm = std::stoi(argv[2]);
+        int intensity = (argc >= 4) ? std::stoi(argv[3]) : 500;
+        configs = {{np, nm, intensity, intensity}};
     }
 
-    for (int count : record_counts) {
-        std::cout << "\n=== Sekvenčný pipeline — " << count << " záznamov ===" << std::endl;
+    for (const auto& cfg : configs) {
+        std::cout << "\n=== Sekvenčné hodovanie: " << cfg.num_philosophers << " filozofov, "
+                  << cfg.num_meals << " jedál ===" << std::endl;
 
-        // Fáza 1: Generovanie (simulácia čítania)
-        auto records = generate_records(count);
-
-        Stats stats;
-        std::vector<ProcessedRecord> results;
-        results.reserve(count);
-
+        std::vector<PhilosopherStats> stats;
         double time_ms = measure_time([&]() {
-            for (const auto& rec : records) {
-                // Fáza 2: Spracovanie
-                auto processed = process_record(rec);
-
-                // Fáza 3: Aktualizácia štatistík a uloženie
-                update_stats(stats, processed);
-                results.push_back(processed);
-            }
+            dining_sequential(cfg, stats);
         });
 
-        print_stats(stats);
-        std::cout << "Čas: " << std::fixed << std::setprecision(2) << time_ms << " ms" << std::endl;
+        print_dining_stats(stats);
+        check_fairness(stats);
+        bool correct = verify_results(stats, cfg.num_meals);
+        std::cout << "Správnosť: " << (correct ? "OK" : "CHYBA!") << std::endl;
+        std::cout << "Celkový čas: " << std::fixed << std::setprecision(2) << time_ms << " ms" << std::endl;
     }
 
     return 0;

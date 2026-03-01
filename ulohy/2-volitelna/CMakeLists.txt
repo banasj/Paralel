@@ -1,4 +1,4 @@
-## Úloha 2: Gaussovský filter (spracovanie obrázkov)
+## Úloha 2: K-means klasterizácia
 
 # Sekvenčná verzia
 add_executable(u2_seq src/main_seq.cpp)
